@@ -3,8 +3,6 @@
 #include <vector>
 #include <cstdint>
 
-
-
 template <class T>
 class LightProtocol
 {
@@ -137,7 +135,6 @@ public:
 private:
     uint16_t index;
     T leds;
-    TCPClient client;
     bool debug;
     std::vector<uint8_t> buffer;
 };
