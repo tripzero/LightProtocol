@@ -1,5 +1,7 @@
 /* light protocol for use with photon or arduino-like controllers*/
 
+#include <vector>
+
 template <class T>
 class LightProtocol
 {
@@ -148,3 +150,5 @@ private:
     bool debug;
     std::vector<uint8_t> buffer;
 };
+
+void processClient(client);
