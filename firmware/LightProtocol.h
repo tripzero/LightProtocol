@@ -151,8 +151,8 @@ private:
     std::vector<uint8_t> buffer;
 };
 
-template<class T>
-void processClient(const T & tcpClient, std::vector<uint8_t> & buffer, const LightProtocolParser & lightProtocolParser)
+template<class T, class N>
+void processClient(const T & tcpClient, std::vector<uint8_t> & buffer, const N & lightProtocolParser)
 {
     int msgSize = 0;
             
