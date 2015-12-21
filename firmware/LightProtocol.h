@@ -8,7 +8,7 @@
 
 #if defined(PHOTON)
 #include "spark_wiring_ticks.h"
-#else
+#endif
 
 
 template <class T>
