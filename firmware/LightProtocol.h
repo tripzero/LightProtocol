@@ -13,7 +13,8 @@ public:
         SetNumLights = 0x02,
         Clear = 0x03,
         LightThreshold = 0x04,
-        Debug = 0x05
+        Debug = 0x05,
+        SetAllLights = 0x06
     };
     
     LightProtocol(const T & light=T(), bool d = false)
@@ -41,19 +42,35 @@ public:
     {
         //debugOut("Trying to change some lights: ");
         //debugOut(String(numLights));
-        
+        uint8_t lowbit;
+        uint16_t id;
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+
         for(uint16_t i = 0; i < numLights; i++)
         {
-            uint8_t lowbit = getNextByte();
-            uint16_t id = (getNextByte() << 8) | (lowbit);
-            uint8_t r = getNextByte();
-            uint8_t g = getNextByte();
-            uint8_t b = getNextByte();
-            //debugOut("Setting light(" + String(id) + ") to: " + String(r) + ", " + String(g) + ", " + String(b));
+            lowbit = getNextByte();
+            id = (getNextByte() << 8) | (lowbit);
+            r = getNextByte();
+            g = getNextByte();
+            b = getNextByte();
             leds.setPixelColor(id, r, g, b);
         }
   
         leds.show();
+    }
+
+    void setAllLights()
+    {
+        uint8_t r = getNextByte();
+        uint8_t g = getNextByte();
+        uint8_t b = getNextByte();
+
+        for(uint16_t i = 0; i < leds.numLights(); i++)
+        {
+            leds.setPixelColor(i, r, g, b);
+        }
     }
     
     void clear()
@@ -125,10 +142,10 @@ public:
             uint8_t d = getNextByte();
             debug = d != 0;
         }
-        /*else if(cmd == LightThreshold)
+        else if(cmd == SetAllLights)
         {
-            lightThreshold = getNextByte();
-        }*/
+            setAllLights();
+        }
     }
 
 
