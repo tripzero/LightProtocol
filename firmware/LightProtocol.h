@@ -1,6 +1,7 @@
 /* light protocol for use with photon or arduino-like controllers*/
 
 #include <vector>
+#include <cstdint>
 
 template <class T>
 class LightProtocol
