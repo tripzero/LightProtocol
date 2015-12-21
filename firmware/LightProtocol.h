@@ -7,7 +7,7 @@
 #endif
 
 #if defined(PHOTON)
-#include "spark_wiring_ticks.h"
+#include "spark_wiring_tcpclient.h"
 #endif
 
 
