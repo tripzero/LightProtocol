@@ -140,7 +140,7 @@ private:
 };
 
 template<class T, class N>
-void processClient(const T & tcpClient, std::vector<uint8_t> & buffer, const N & lightProtocolParser)
+void processClient(T & tcpClient, std::vector<uint8_t> & buffer, N & lightProtocolParser)
 {
     int msgSize = 0;
             
