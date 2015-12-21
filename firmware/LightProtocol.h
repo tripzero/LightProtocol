@@ -84,7 +84,7 @@ public:
             **/
             //debugOut("cmd: SetLights");
             uint8_t numlightsLowbit = getNextByte();
-            uint16_t numLights = (getNextByte() << 8) | (numlightsLowbit & 0xff);
+            uint16_t numLights = (getNextByte() << 8) | (numlightsLowbit);
             
             //debugOut("num lights to set" + String(numLights));
             
