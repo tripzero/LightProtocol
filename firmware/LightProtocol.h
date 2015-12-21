@@ -2,6 +2,15 @@
 
 #include <vector>
 
+#if (PLATFORM_ID == 6)
+        #define PHOTON
+#endif
+
+#if defined(PHOTON)
+#include "spark_wiring_ticks.h"
+#else
+
+
 template <class T>
 class LightProtocol
 {
