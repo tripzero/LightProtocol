@@ -156,13 +156,13 @@ void processClient(const T & tcpClient, std::vector<uint8_t> & buffer, const N &
 {
     int msgSize = 0;
             
-    while ((msgSize = client.available())) // read from client
+    while ((msgSize = tcpClient.available())) // read from client
     {
         lightProtocolParser.debugOut("msg size: " + String(msgSize));
         uint8_t b = 0;
         for(int i=0; i < msgSize; i++)
         {
-            b = client.read();
+            b = tcpClient.read();
             if (b == '\n')
             {
                 lightProtocolParser.parse(buffer);
