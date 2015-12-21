@@ -3,6 +3,8 @@
 #include <vector>
 #include <cstdint>
 
+
+
 template <class T>
 class LightProtocol
 {
@@ -24,7 +26,6 @@ public:
     
     void begin()
     {
-        debugOut("We've only just begun...");
         leds.begin();
     }
     
@@ -32,7 +33,6 @@ public:
     {
         if(index+1 > buffer.size())
         {
-            debugOut("requested a byte more than we have...");
             return 0;
         }
         
@@ -75,9 +75,7 @@ public:
     }
 
     void doCommand(uint8_t cmd)
-    {
-        debugOut("cmd: " + String(cmd));
-        
+    {        
         if(cmd == SetLights)
         {
             /**
@@ -92,7 +90,6 @@ public:
             
             if(numLights > leds.numLights())
             {
-                debugOut("number of lights to set is higher than the number of lights I have");
                 return;
             }
     
@@ -123,12 +120,10 @@ public:
             * Clear
             * [0x03 8bits]
             **/
-            debugOut("cmd: Clear");
             clear();
         }
         else if(cmd == Debug)
         {
-            debugOut("cmd: Debug");
             uint8_t d = getNextByte();
             debug = d != 0;
         }
@@ -137,15 +132,10 @@ public:
             lightThreshold = getNextByte();
         }*/
     }
-    
-    void debugOut(String msg)
-    {
-        if(debug)
-            Particle.publish("debug", msg, PRIVATE);
-    }
-    
+
+
 private:
-    uint index;
+    uint16_t index;
     T leds;
     TCPClient client;
     bool debug;
@@ -159,7 +149,6 @@ void processClient(const T & tcpClient, std::vector<uint8_t> & buffer, const N &
             
     while ((msgSize = tcpClient.available())) // read from client
     {
-        lightProtocolParser.debugOut("msg size: " + String(msgSize));
         uint8_t b = 0;
         for(int i=0; i < msgSize; i++)
         {
