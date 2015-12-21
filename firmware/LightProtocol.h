@@ -151,4 +151,4 @@ private:
     std::vector<uint8_t> buffer;
 };
 
-void processClient(client);
+void processClient(const TcpClient & client, std::vector<uint8_t> & buffer, const LightProtocolParser & lightProtocolParser);
