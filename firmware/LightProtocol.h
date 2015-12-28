@@ -3,6 +3,26 @@
 #include <vector>
 #include <cstdint>
 
+#if DEBUG
+#include <string>
+#include <iostream>
+
+#define String std::string
+
+void debugOut(const auto & msg)
+{
+    std::cout<<"debug: "<< msg << std::endl;
+}
+
+#else
+
+void debugOut(const String &msg)
+{
+
+}
+
+#endif
+
 template <class T>
 class LightProtocol
 {
@@ -40,8 +60,8 @@ public:
 
     void setLights(uint16_t numLights)
     {
-        //debugOut("Trying to change some lights: ");
-        //debugOut(String(numLights));
+        debugOut("Trying to change some lights: ");
+        debugOut(numLights);
         uint8_t lowbit;
         uint16_t id;
         uint8_t r;
@@ -71,6 +91,8 @@ public:
         {
             leds.setPixelColor(i, r, g, b);
         }
+
+        leds.show();
     }
     
     void clear()
@@ -97,11 +119,12 @@ public:
             * SetLights
             * [cmd 8][numlights 16][lightId 16][R 8][G 8][B 8]...
             **/
-            //debugOut("cmd: SetLights");
+            debugOut("cmd: SetLights");
             uint8_t numlightsLowbit = getNextByte();
             uint16_t numLights = (getNextByte() << 8) | (numlightsLowbit);
             
-            //debugOut("num lights to set" + String(numLights));
+            debugOut("num lights to set" );
+            debugOut(numLights);
             
             if(numLights > leds.numLights())
             {
@@ -116,11 +139,12 @@ public:
             * SetNumLights
             * [0x02 8bits][numlights 16bits]
             **/
-            //debugOut("cmd: SetNumLights");
+            debugOut("cmd: SetNumLights");
             
             uint8_t numlightsLowbit = getNextByte();
             
-            //debugOut("lsb: " + String(numlightsLowbit));
+            debugOut("lsb: ");
+            debugOut(numlightsLowbit);
             
             uint16_t numLights = getNextByte() << 8;
             numLights |= (numlightsLowbit);
