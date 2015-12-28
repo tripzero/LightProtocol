@@ -16,10 +16,7 @@ void debugOut(const auto & msg)
 
 #else
 
-void debugOut(const String &msg)
-{
-
-}
+#define debugOut(x)
 
 #endif
 
