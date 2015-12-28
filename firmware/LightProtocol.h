@@ -1,5 +1,8 @@
 /* light protocol for use with photon or arduino-like controllers*/
 
+#ifndef _LIGHTPROTOCOL_H_
+#define _LIGHTPROTOCOL_H_
+
 #include <vector>
 #include <cstdint>
 
@@ -200,3 +203,5 @@ void processClient(T & tcpClient, std::vector<uint8_t> & buffer, N & lightProtoc
         }
     }
 }
+
+#endif
