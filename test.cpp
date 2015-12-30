@@ -55,14 +55,16 @@ public:
 
 	int read()
 	{
-		std::cout<<"TestClient::read"<<std::endl;
+		std::cout<<"TestClient::read: ";
 		if (mFrame.size())
 		{
 			int b = mFrame[0];
 			mFrame.erase(mFrame.begin());
+
+			std::cout<<(int)b <<std::endl;
 			return b;
 		}
-
+		std::cout<<"no data"<<std::endl;
 		return -1;
 	}
 
@@ -70,6 +72,7 @@ public:
 	{
 		return mFrame.size();
 	}
+	
 private:
 	std::vector<uint8_t> mFrame;
 };
@@ -182,9 +185,33 @@ int main(int argc, char** argv)
 	frame.push_back(100); // green
 	frame.push_back(100); // blue
 
-	TestClient client(frame);
+	{
+		TestClient client(frame);
 
-	lights.processClient(client, buffer);
+		lights.processClient(client, buffer);	
+	}
+	
+
+	frame.clear();
+	buffer.clear();
+
+	/// try set all colors:
+	//01 0600 06 00 00 64
+
+	frame.push_back(0x01); // protocol version 1:
+	frame.push_back(0x04); // payload length lsb
+	frame.push_back(0x00); // payload length msb
+
+	frame.push_back(0x06); // set lights command
+	frame.push_back(0x00); // r
+	frame.push_back(0x00); // g
+	frame.push_back(0x64); // b
+
+	{
+		TestClient client(frame);
+		lights.processClient(client, buffer);
+	}
+	
 }
 
 

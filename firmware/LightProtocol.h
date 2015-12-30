@@ -201,7 +201,7 @@ public:
 
         }     
 
-        for(int i=0; i < msgSize; i++)
+        for(int i=0; i < std::min(msgLength, msgSize); i++)
         {
             uint8_t b = tcpClient.read();
             buffer.push_back(b);
