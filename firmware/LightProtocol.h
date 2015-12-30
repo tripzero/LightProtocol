@@ -38,7 +38,7 @@ public:
     };
     
     LightProtocol(const T & light=T(), bool d = false)
-    :debug(d), index(0), leds(light)
+    :debug(d), index(0), leds(light), msgLength(0)
     {
         
     }
@@ -172,36 +172,56 @@ public:
         }
     }
 
+    template<class C>
+    void processClient(C & tcpClient, std::vector<uint8_t> & buffer)
+    {
+        uint16_t msgSize = tcpClient.available();
+
+        if (msgSize < 3)
+        {
+            return;
+        }
+                
+        if (msgLength == 0)
+        {
+            uint8_t version = tcpClient.read();
+
+            if (version != 1)
+            {
+                /// we only support version 1
+                debugOut("we only support protocol version 1");
+                return;
+            }
+
+            uint8_t b = tcpClient.read();    
+            msgLength = b | (tcpClient.read() << 8);
+
+            debugOut("msg length: ");
+            debugOut(msgLength);
+
+        }     
+
+        for(int i=0; i < msgSize; i++)
+        {
+            uint8_t b = tcpClient.read();
+            buffer.push_back(b);
+
+            if (buffer.size() == msgLength)
+            {
+                parse(buffer);
+                buffer.clear();
+                msgLength = 0;
+            }
+        }
+    }
+
 
 private:
     uint16_t index;
     T leds;
     bool debug;
     std::vector<uint8_t> buffer;
+    uint16_t msgLength;
 };
-
-template<class T, class N>
-void processClient(T & tcpClient, std::vector<uint8_t> & buffer, N & lightProtocolParser)
-{
-    int msgSize = 0;
-            
-    while ((msgSize = tcpClient.available())) // read from client
-    {
-        uint8_t b = 0;
-        for(int i=0; i < msgSize; i++)
-        {
-            b = tcpClient.read();
-            if (b == '\n')
-            {
-                lightProtocolParser.parse(buffer);
-                buffer.clear();
-            }
-            else if (b != -1)
-            {
-                buffer.push_back(b);
-            }
-        }
-    }
-}
 
 #endif
