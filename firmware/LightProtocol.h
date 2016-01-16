@@ -34,7 +34,8 @@ public:
         Clear = 0x03,
         LightThreshold = 0x04,
         Debug = 0x05,
-        SetAllLights = 0x06
+        SetAllLights = 0x06,
+        SetSeries = 0x07
     };
     
     LightProtocol(const T & light=T(), bool d = false)
@@ -94,6 +95,29 @@ public:
 
         leds.show();
     }
+
+    void setSeries()
+    {
+        uint16_t startId;
+        uint16_t length;
+        uint8_t lsb;
+
+        lsb = getNextByte();
+        startId = (getNextByte() << 8) | lsb;
+        lsb = getNextByte();
+        length = (getNextByte() << 8) | lsb;
+
+        uint8_t r = getNextByte();
+        uint8_t g = getNextByte();
+        uint8_t b = getNextByte();
+
+        for(uint16_t i = startId; i < length; i++)
+        {
+            leds.setPixelColor(i, r, g, b);
+        }
+
+        leds.show();
+    }
     
     void clear()
     {
@@ -101,6 +125,8 @@ public:
         {
             leds.setPixelColor(i, 0, 0, 0);
         }
+
+        leds.show();
     }
     
     void parse(const std::vector<uint8_t> & buff)
@@ -169,6 +195,10 @@ public:
         else if(cmd == SetAllLights)
         {
             setAllLights();
+        }
+        else if(cmd == SetSeries)
+        {
+            setSeries();
         }
     }
 
