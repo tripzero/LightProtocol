@@ -14,7 +14,7 @@
 
 void debugOut(const auto & msg)
 {
-    std::cout<<"debug: "<< msg << std::endl;
+	std::cout<<"debug: "<< msg << std::endl;
 }
 
 #else
@@ -27,231 +27,246 @@ template <class T>
 class LightProtocol
 {
 public:
-    enum Command {
-        None = 0x00,
-        SetLights = 0x01,
-        SetNumLights = 0x02,
-        Clear = 0x03,
-        LightThreshold = 0x04,
-        Debug = 0x05,
-        SetAllLights = 0x06,
-        SetSeries = 0x07
-    };
-    
-    LightProtocol(const T & light=T(), bool d = false)
-    :debug(d), index(0), leds(light), msgLength(0)
-    {
-        
-    }
-    
-    void begin()
-    {
-        leds.begin();
-    }
-    
-    uint8_t getNextByte()
-    {
-        if(index+1 > buffer.size())
-        {
-            return 0;
-        }
-        
-        return buffer[index++];
-    }
+	enum Command {
+		None = 0x00,
+		SetLights = 0x01,
+		SetNumLights = 0x02,
+		Clear = 0x03,
+		LightThreshold = 0x04,
+		Debug = 0x05,
+		SetAllLights = 0x06,
+		SetSeries = 0x07
+	};
 
-    void setLights(uint16_t numLights)
-    {
-        debugOut("Trying to change some lights: ");
-        debugOut(numLights);
-        uint8_t lowbit;
-        uint16_t id;
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
+	LightProtocol(const T & light=T(), bool d = false)
+	:debug(d), index(0), leds(light), msgLength(0), supportedVersion(0x01)
+	{
+		debugOut("LightProtocol instantiated");
+	}
 
-        for(uint16_t i = 0; i < numLights; i++)
-        {
-            lowbit = getNextByte();
-            id = (getNextByte() << 8) | (lowbit);
-            r = getNextByte();
-            g = getNextByte();
-            b = getNextByte();
-            leds.setPixelColor(id, r, g, b);
-        }
-  
-        leds.show();
-    }
+	void begin()
+	{
+		leds.begin();
+	}
 
-    void setAllLights()
-    {
-        uint8_t r = getNextByte();
-        uint8_t g = getNextByte();
-        uint8_t b = getNextByte();
+	uint8_t getNextByte()
+	{
+		if(index+1 > buffer.size())
+		{
+			return 0;
+		}
 
-        for(uint16_t i = 0; i < leds.numLights(); i++)
-        {
-            leds.setPixelColor(i, r, g, b);
-        }
+		return buffer[index++];
+	}
 
-        leds.show();
-    }
+	void setLights(uint16_t numLights)
+	{
+		debugOut("Trying to change some lights: ");
+		debugOut(numLights);
+		uint8_t lowbit;
+		uint16_t id;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
 
-    void setSeries()
-    {
-        uint16_t startId;
-        uint16_t length;
-        uint8_t lsb;
+		for(uint16_t i = 0; i < numLights; i++)
+		{
+			lowbit = getNextByte();
+			id = (getNextByte() << 8) | (lowbit);
+			r = getNextByte();
+			g = getNextByte();
+			b = getNextByte();
+			leds.setPixelColor(id, r, g, b);
+		}
 
-        lsb = getNextByte();
-        startId = (getNextByte() << 8) | lsb;
-        lsb = getNextByte();
-        length = (getNextByte() << 8) | lsb;
+		leds.show();
+	}
 
-        uint8_t r = getNextByte();
-        uint8_t g = getNextByte();
-        uint8_t b = getNextByte();
+	void setAllLights()
+	{
+		debugOut("setAllLights:");
 
-        for(uint16_t i = startId; i < length; i++)
-        {
-            leds.setPixelColor(i, r, g, b);
-        }
+		uint8_t r = getNextByte();
+		uint8_t g = getNextByte();
+		uint8_t b = getNextByte();
 
-        leds.show();
-    }
-    
-    void clear()
-    {
-        for(int i=0; i<leds.numLights(); i++)
-        {
-            leds.setPixelColor(i, 0, 0, 0);
-        }
+		for(uint16_t i = 0; i < leds.numLights(); i++)
+		{
+			leds.setPixelColor(i, r, g, b);
+		}
 
-        leds.show();
-    }
-    
-    void parse(const std::vector<uint8_t> & buff)
-    {
-        buffer = buff;
-        index = 0;   
-        uint8_t cmd = getNextByte();
-        doCommand(cmd);
-    }
+		leds.show();
+	}
 
-    void doCommand(uint8_t cmd)
-    {        
-        if(cmd == SetLights)
-        {
-            /**
-            * SetLights
-            * [cmd 8][numlights 16][lightId 16][R 8][G 8][B 8]...
-            **/
-            debugOut("cmd: SetLights");
-            uint8_t numlightsLowbit = getNextByte();
-            uint16_t numLights = (getNextByte() << 8) | (numlightsLowbit);
-            
-            debugOut("num lights to set" );
-            debugOut(numLights);
-            
-            if(numLights > leds.numLights())
-            {
-                return;
-            }
-    
-            setLights(numLights);   
-        }
-        else if(cmd == SetNumLights)
-        {
-            /**
-            * SetNumLights
-            * [0x02 8bits][numlights 16bits]
-            **/
-            debugOut("cmd: SetNumLights");
-            
-            uint8_t numlightsLowbit = getNextByte();
-            
-            debugOut("lsb: ");
-            debugOut(numlightsLowbit);
-            
-            uint16_t numLights = getNextByte() << 8;
-            numLights |= (numlightsLowbit);
-            
-            //debugOut("setting number of lights to " + String(numLights));
-            
-            leds.updateLength(numLights);
-        }
-        else if(cmd == Clear)
-        {
-            /**
-            * Clear
-            * [0x03 8bits]
-            **/
-            clear();
-        }
-        else if(cmd == Debug)
-        {
-            uint8_t d = getNextByte();
-            debug = d != 0;
-        }
-        else if(cmd == SetAllLights)
-        {
-            setAllLights();
-        }
-        else if(cmd == SetSeries)
-        {
-            setSeries();
-        }
-    }
+	void setSeries()
+	{
+		uint16_t startId;
+		uint16_t length;
+		uint8_t lsb;
 
-    template<class C>
-    void processClient(C & tcpClient, std::vector<uint8_t> & buffer)
-    {
-        uint16_t msgSize = tcpClient.available();
+		lsb = getNextByte();
+		startId = (getNextByte() << 8) | lsb;
+		lsb = getNextByte();
+		length = (getNextByte() << 8) | lsb;
 
-        if (msgSize < 3)
-        {
-            return;
-        }
-                
-        if (msgLength == 0)
-        {
-            uint8_t version = tcpClient.read();
+		uint8_t r = getNextByte();
+		uint8_t g = getNextByte();
+		uint8_t b = getNextByte();
 
-            if (version != 1)
-            {
-                /// we only support version 1
-                debugOut("we only support protocol version 1");
-                return;
-            }
+		for(uint16_t i = startId; i < length; i++)
+		{
+			leds.setPixelColor(i, r, g, b);
+		}
 
-            uint8_t b = tcpClient.read();    
-            msgLength = b | (tcpClient.read() << 8);
+		leds.show();
+	}
 
-            debugOut("msg length: ");
-            debugOut(msgLength);
+	void clear()
+	{
+		debugOut("clear()");
+		for(int i=0; i<leds.numLights(); i++)
+		{
+			leds.setPixelColor(i, 0, 0, 0);
+		}
 
-        }     
+		leds.show();
+	}
 
-        for(int i=0; i < std::min(msgLength, msgSize); i++)
-        {
-            uint8_t b = tcpClient.read();
-            buffer.push_back(b);
+	void parse(const std::vector<uint8_t> & buff)
+	{
+		buffer = buff;
+		index = 0;
+		while (buffer.size())
+		{
+			uint8_t cmd = getNextByte();
+			doCommand(cmd);
+		}
+	}
 
-            if (buffer.size() == msgLength)
-            {
-                parse(buffer);
-                buffer.clear();
-                msgLength = 0;
-            }
-        }
-    }
+	void doCommand(uint8_t cmd)
+	{
+		if(cmd == SetLights)
+		{
+			/**
+			* SetLights
+			* [cmd 8][numlights 16][lightId 16][R 8][G 8][B 8]...
+			**/
+			debugOut("cmd: SetLights");
+			uint8_t numlightsLowbit = getNextByte();
+			uint16_t numLights = (getNextByte() << 8) | (numlightsLowbit);
+
+			debugOut("num lights to set" );
+			debugOut(numLights);
+
+			if(numLights > leds.numLights())
+			{
+				return;
+			}
+
+			setLights(numLights);
+		}
+		else if(cmd == SetNumLights)
+		{
+			/**
+			* SetNumLights
+			* [0x02 8bits][numlights 16bits]
+			**/
+			debugOut("cmd: SetNumLights");
+
+			uint8_t numlightsLowbit = getNextByte();
+
+			debugOut("lsb: ");
+			debugOut(numlightsLowbit);
+
+			uint16_t numLights = getNextByte() << 8;
+			numLights |= (numlightsLowbit);
+
+			//debugOut("setting number of lights to " + String(numLights));
+
+			leds.updateLength(numLights);
+		}
+		else if(cmd == Clear)
+		{
+			/**
+			* Clear
+			* [0x03 8bits]
+			**/
+			clear();
+		}
+		else if(cmd == Debug)
+		{
+			uint8_t d = getNextByte();
+			debug = d != 0;
+		}
+		else if(cmd == SetAllLights)
+		{
+			setAllLights();
+		}
+		else if(cmd == SetSeries)
+		{
+			setSeries();
+		}
+	}
+
+	template<class C>
+	void processClient(C & client, std::vector<uint8_t> & buffer)
+	{
+		uint16_t msgSize = client.available();
+
+		debugOut("msgSize: ");
+		debugOut(msgSize);
+
+		if (msgSize < 3)
+		{
+			debugOut("msg size too small");
+			return;
+		}
+
+		if (msgLength == 0)
+		{
+			uint8_t version = client.read();
+
+			if (version != supportedVersion)
+			{
+				/// we only support version 1
+				debugOut("we only support protocol version:");
+				debugOut(supportedVersion);
+				debugOut("received version value:");
+				debugOut(version);
+
+				return;
+			}
+
+			uint8_t b = client.read();
+			msgLength = b | (client.read() << 8);
+
+			debugOut("payload length: ");
+			debugOut(msgLength);
+
+		}
+
+		for(int i=0; i < std::min(msgLength, msgSize); i++)
+		{
+			uint8_t b = client.read();
+			buffer.push_back(b);
+
+			if (buffer.size() == msgLength)
+			{
+				parse(buffer);
+				buffer.clear();
+				msgLength = 0;
+			}
+		}
+	}
 
 
 private:
-    uint16_t index;
-    T leds;
-    bool debug;
-    std::vector<uint8_t> buffer;
-    uint16_t msgLength;
+	uint16_t index;
+	T leds;
+	bool debug;
+	std::vector<uint8_t> buffer;
+	uint16_t msgLength;
+	uint8_t supportedVersion;
 };
 
 #endif
