@@ -2,6 +2,6 @@
   "name": "LightProtocol",
   "author": "Kevron Rees",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast binary light protocol for controlling lights and light strips over a TCP socket"
 }
