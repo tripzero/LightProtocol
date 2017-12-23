@@ -114,7 +114,7 @@ public:
         }
     }
 
-    int available()
+    qint64 available()
     {
         if(buffer.count()) {
             debugOut("buffer count:");
@@ -173,18 +173,27 @@ template<class T>
 void testUdp(std::vector<uint8_t> buffer, LightProtocol<T> lights)
 {
     QUdpSocket socket;
-    socket.bind(QHostAddress::LocalHost, 1888);
+    if (!socket.bind(QHostAddress::LocalHost, 1888))
+    {
+        std::cerr<<"error binding to udp socket port 1888"<<std::endl;
+    }
 
     TestUdpClient client(&socket);
 
     while(true)
     {
-        if(socket.hasPendingDatagrams())
+        if(socket.waitForReadyRead(1000))
         {
-            std::cout<<"We have a connection!"<<std::endl;
-            socket.waitForReadyRead(1000);
-            lights.processClient(client, buffer);
+            while (socket.hasPendingDatagrams())
+            {
+                lights.processClient(client, buffer);
+            }
         }
+        else
+        {
+            std::cout << "allegedly nothing to read..." << endl;
+        }
+        std::cout << "looping..." << std::endl;
     }
 
 }

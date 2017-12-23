@@ -1,9 +1,9 @@
 QT += network
 
-CONFIG += c++14
+CONFIG += c++14 debug
 
-INCLUDEPATH += ../firmware/
+INCLUDEPATH += ../src/
 
-SOURCES += main.cpp ../firmware/LightProtocol.cpp
+SOURCES += main.cpp ../src/LightProtocol.cpp
 
 DEFINES += DEBUG

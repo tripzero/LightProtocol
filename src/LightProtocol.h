@@ -136,7 +136,7 @@ public:
 	{
 		buffer = buff;
 		index = 0;
-		while (buffer.size())
+		while (index < buffer.size())
 		{
 			uint8_t cmd = getNextByte();
 			doCommand(cmd);
