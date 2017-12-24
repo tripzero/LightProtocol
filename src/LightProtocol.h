@@ -49,6 +49,11 @@ public:
 		leds.begin();
 	}
 
+	virtual void show()
+	{
+		leds.show();
+	}
+
 	uint8_t getNextByte()
 	{
 		if(index+1 > buffer.size())
@@ -78,8 +83,6 @@ public:
 			b = getNextByte();
 			leds.setPixelColor(id, r, g, b);
 		}
-
-		leds.show();
 	}
 
 	void setAllLights()
@@ -94,8 +97,6 @@ public:
 		{
 			leds.setPixelColor(i, r, g, b);
 		}
-
-		leds.show();
 	}
 
 	void setSeries()
@@ -117,8 +118,6 @@ public:
 		{
 			leds.setPixelColor(i, r, g, b);
 		}
-
-		leds.show();
 	}
 
 	void clear()
@@ -128,8 +127,6 @@ public:
 		{
 			leds.setPixelColor(i, 0, 0, 0);
 		}
-
-		leds.show();
 	}
 
 	void parse(const std::vector<uint8_t> & buff)

@@ -112,6 +112,8 @@ public:
 
             return val;
         }
+
+	return -1;
     }
 
     qint64 available()
