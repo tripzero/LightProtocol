@@ -3,10 +3,9 @@
 #ifndef _LIGHTPROTOCOL_H_
 #define _LIGHTPROTOCOL_H_
 
-#include <vector>
 #include <cstdint>
 
-#if DEBUG
+#ifdef DEBUG_ME
 #include <string>
 #include <iostream>
 
@@ -22,6 +21,64 @@ void debugOut(const auto & msg)
 #define debugOut(x)
 
 #endif
+
+template <class T>
+T min(const T & one, const T & two)
+{
+	if (one < two)
+		return one;
+
+	return two;
+}
+
+class ByteArray {
+public:
+
+	ByteArray(uint16_t max_size = 1024)
+	:capacity(0), max_size(max_size), buffer(new uint8_t[max_size])
+	{
+
+	}
+
+	ByteArray &operator=(const ByteArray &other)
+	{
+		capacity = other.capacity;
+		buffer = other.buffer;
+
+		return *this;
+	}
+
+	uint8_t operator[](int index)
+	{
+		if (index >= capacity)
+		{
+			return -1;
+		}
+
+		return buffer[index];
+	}
+
+	void push_back(uint8_t b)
+	{
+		if (capacity < max_size)
+			buffer[capacity++] = b;
+	}
+
+	int size() const 
+	{
+		return capacity;
+	}
+
+	void clear()
+	{
+		capacity = 0;
+	}
+
+	int capacity;
+	uint16_t max_size;
+	uint8_t *buffer;
+};
+
 
 template <class T>
 class LightProtocol
@@ -129,7 +186,7 @@ public:
 		}
 	}
 
-	void parse(const std::vector<uint8_t> & buff)
+	void parse(const ByteArray & buff)
 	{
 		buffer = buff;
 		index = 0;
@@ -206,7 +263,7 @@ public:
 	}
 
 	template<class C>
-	void processClient(C & client, std::vector<uint8_t> & buffer)
+	void processClient(C & client, ByteArray & buffer)
 	{
 		uint16_t msgSize = client.available();
 
@@ -242,7 +299,7 @@ public:
 
 		}
 
-		for(int i=0; i < std::min(msgLength, msgSize); i++)
+		for(int i=0; i < min(msgLength, msgSize); i++)
 		{
 			uint8_t b = client.read();
 			buffer.push_back(b);
@@ -261,7 +318,7 @@ private:
 	uint16_t index;
 	T leds;
 	bool debug;
-	std::vector<uint8_t> buffer;
+	ByteArray buffer;
 	uint16_t msgLength;
 	uint8_t supportedVersion;
 };

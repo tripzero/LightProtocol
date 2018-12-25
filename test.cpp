@@ -2,7 +2,6 @@
 
 #include "LightProtocol.h"
 #include <iostream>
-#include <vector>
 
 class TestLights
 {
@@ -47,7 +46,7 @@ private:
 class TestClient {
 public:
 
-	TestClient(std::vector<uint8_t> frame)
+	TestClient(ByteArray frame)
 	:mFrame(frame)
 	{
 
@@ -74,14 +73,14 @@ public:
 	}
 	
 private:
-	std::vector<uint8_t> mFrame;
+	ByteArray mFrame;
 };
 
 int main(int argc, char** argv)
 {
 	std::cout<<"hello world"<< std::endl;
 	LightProtocol<TestLights> lights;
-	std::vector<uint8_t> buffer;
+	ByteArray buffer;
 
 	/// test set num lights:
 
@@ -171,7 +170,7 @@ int main(int argc, char** argv)
 	lights.parse(buffer);
 	buffer.clear();
 
-	std::vector<uint8_t> frame;
+	ByteArray frame;
 	frame.push_back(0x01); // protocol version 1:
 	frame.push_back(0x08); // payload length lsb
 	frame.push_back(0x00); // payload length msb

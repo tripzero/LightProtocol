@@ -172,7 +172,7 @@ void testTcp(std::vector<uint8_t> buffer, LightProtocol<T> lights)
 }
 
 template<class T>
-void testUdp(std::vector<uint8_t> buffer, LightProtocol<T> lights)
+void testUdp(ByteArray buffer, LightProtocol<T> lights)
 {
     QUdpSocket socket;
     if (!socket.bind(QHostAddress::LocalHost, 1888))
@@ -202,7 +202,7 @@ void testUdp(std::vector<uint8_t> buffer, LightProtocol<T> lights)
 
 int main(int argc, char** argv)
 {
-    std::vector<uint8_t> buffer;
+    ByteArray buffer;
     LightProtocol<TestLights> lights;
 
     //testTcp(buffer, lights);

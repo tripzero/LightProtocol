@@ -6,4 +6,4 @@ INCLUDEPATH += ../src/
 
 SOURCES += main.cpp ../src/LightProtocol.cpp
 
-DEFINES += DEBUG
+DEFINES += DEBUG_ME
