@@ -95,8 +95,8 @@ public:
 		SetSeries = 0x07
 	};
 
-	LightProtocol(const T & light=T(), bool d = false)
-	:debug(d), index(0), leds(light), msgLength(0), supportedVersion(0x01)
+	LightProtocol(const T & light=T(), bool d = false, int * last_cmd = nullptr)
+	:debug(d), index(0), leds(light), msgLength(0), supportedVersion(0x01), last_cmd(last_cmd)
 	{
 		debugOut("LightProtocol instantiated");
 	}
@@ -199,6 +199,9 @@ public:
 
 	void doCommand(uint8_t cmd)
 	{
+		if (last_cmd != nullptr)
+			*last_cmd = cmd;
+
 		if(cmd == SetLights)
 		{
 			/**
@@ -321,6 +324,7 @@ private:
 	ByteArray buffer;
 	uint16_t msgLength;
 	uint8_t supportedVersion;
+	int * last_cmd;
 };
 
 #endif
